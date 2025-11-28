@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <%- include('partials/header.ejs'); %>
+<body>
+    <main>
+        <% if (books.length === 0) { %>
+            <p>No books yet! Add your first review.</p>
+        <% } else { %>
+            <% books.forEach(book => { %>
+                <article class ="media-card" onclick="window.location.href='/books/<%= book.id %>'">
+                    <img src="<%= book.cover_url %>" alt="<%= book.book_title %>" class="card-image">
+
+                    <div class="card-content">
+                        <h2 class="card-title"><%= book.book_title %></h2>
+                        <p class = "card-excerpt"><%= book.review.slice(0, 150) %>...</p>
+                        <img src="/assets/book-icon-thick.svg" alt="Book" class="card-media-icon">
+                    </div>
+                </article>
+            <% }) %>
+        <% } %>
+    </main>
+</body>
+
+<%- include ('partials/footer.ejs') %>
+</html>
