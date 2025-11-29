@@ -180,7 +180,7 @@ textarea:focus {
     background-color: #2980b9;
 }
 
-.book-cover {
+.item-cover {
     float: left; /* floats image to the left */
     margin-right: 2rem; /* space between image and text */
     margin-bottom: 1rem; /* space below if text wraps under image */
@@ -189,13 +189,13 @@ textarea:focus {
 }
 
 /* clear float after */
-.book-details::after {
+.item-details::after {
     content: "";
     display: table;
     clear: both;
 }
 
-.book-content h2 {
+.item-content h2 {
     margin-bottom: 1.5rem;
 }
 

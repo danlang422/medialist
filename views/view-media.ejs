@@ -4,9 +4,9 @@
     <%- include('partials/header.ejs'); %>
 
     <main>
-        <div class="book-details">
-            <img src="<%= item.image_url %>" alt="<%= item.title %>" class="book-cover">
-            <div class ="book-content">
+        <div class="item-details">
+            <img src="<%= item.image_url %>" alt="<%= item.title %>" class="item-cover">
+            <div class ="item-content">
                 <h1><%= item.title %></h1>
                 <h2>by <%= item.creator %></h2>
                 <% if (item.year) { %>

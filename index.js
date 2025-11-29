@@ -24,7 +24,7 @@ app.use(express.static("public"));
 async function searchGoogleBooks(title, author) {
     const searchQuery = `${title} ${author}`;
     const encodedQuery = encodeURIComponent(searchQuery);
-    const googleApiURL = `https://www.googleapis.com/books/v1/volumes?q=${searchQuery}`;
+    const googleApiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}`;
 
     const response = await fetch(googleApiURL);
     const data = await response.json();
@@ -44,7 +44,7 @@ async function searchTMDBMovie(title) {
     const searchQuery = `${title}`;
     const encodedQuery = encodeURIComponent(searchQuery);
     const tmdbApiKey = process.env.TMDB_API_KEY;
-    const tmdbApiUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${searchQuery}`;
+    const tmdbApiUrl = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodedQuery}`;
 
     const response = await fetch(tmdbApiUrl);
     const data = await response.json();
