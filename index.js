@@ -65,19 +65,58 @@ async function searchTMDBMovie(title) {
 
 app.get("/", async (req, res) => {
     try {
-        const result = await db.query("SELECT * FROM booklist ORDER BY created_at DESC");
-        res.render("index.ejs", { books: result.rows});
+        const books = await db.query("SELECT *, 'book' AS media_type FROM booklist ORDER BY created_at DESC");
+        const movies = await db.query("SELECT *, 'movie' AS media_type FROM movielist ORDER BY created_at DESC");
+        const tv = await db.query("SELECT *, 'tv' AS media_type FROM tvlist ORDER BY created_at DESC");
+
+        const normalizedBooks = books.rows.map(book => ({
+            id: book.id,
+            title: book.title,
+            creator: book.creator,
+            year: book.year,
+            image_url: book.image_url,
+            review: book.review, 
+            media_type: book.media_type,
+            created_at: book.created_at
+        }));
+
+        const normalizedMovies = movies.rows.map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            creator: movie.creator,
+            year: movie.year,
+            image_url: movie.image_url,
+            review: movie.review,
+            media_type: movie.media_type,
+            created_at: movie.created_at
+        }));
+
+        const normalizedTV = tv.rows.map(show => ({
+            id: show.id,
+            title: show.title,
+            creator: show.creator,
+            year: show.year,
+            image_url: show.image_url,
+            review: show.review,
+            media_type: show.media_type,
+            created_at: show.created_at
+        }));
+
+        const allMedia = [...normalizedBooks, ...normalizedMovies, ...normalizedTV];
+        allMedia.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        res.render("index.ejs", { items: allMedia });
     } catch (error) {
-        console.error(error);
-        res.render("index.ejs", {books: []});
+        console.error(error); 
+        res.render("index.ejs", { items: [] });
     }
 });
 
-app.get("/books/new", (req, res) => { // load all posts
-    res.render("new-book.ejs");
+app.get("/books/new", (req, res) => { // new post page
+    res.render("new-media.ejs");
 })
 
-app.post("/books", async (req, res) => { // post new book review
+app.post("/books", async (req, res) => { // post new media review
     const title = req.body.title;
     const author = req.body.author;
     const review = req.body.review;

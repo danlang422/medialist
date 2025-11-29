@@ -1,19 +1,21 @@
+<%# index.ejs %>
 <!DOCTYPE html>
 <html lang="en">
     <%- include('partials/header.ejs'); %>
 <body>
     <main>
-        <% if (books.length === 0) { %>
-            <p>No books yet! Add your first review.</p>
+        <% if (items.length === 0) { %>
+            <p>No media yet! Add your first review.</p>
         <% } else { %>
-            <% books.forEach(book => { %>
-                <article class ="media-card" onclick="window.location.href='/books/<%= book.id %>'">
-                    <img src="<%= book.cover_url %>" alt="<%= book.book_title %>" class="card-image">
+            <% items.forEach(item => { %>
+                <article class ="media-card" onclick="window.location.href='/<%= item.media_type %>s/<%= item.id %>'">
+                    <img src="<%= item.image_url %>" alt="<%= item.title %>" class="card-image">
 
                     <div class="card-content">
-                        <h2 class="card-title"><%= book.book_title %></h2>
-                        <p class = "card-excerpt"><%= book.review.slice(0, 150) %>...</p>
-                        <img src="/assets/book-icon-thick.svg" alt="Book" class="card-media-icon">
+                        <h2 class="card-title"><%= item.title %></h2>
+                        <p class="card-author">by <%= item.creator %></p>
+                        <p class = "card-excerpt"><%= item.review.slice(0, 150) %>...</p>
+                        <img src="/assets/<%= item.media_type %>-icon-thick.svg" alt="<%= item.media_type %>" class="card-media-icon">
                     </div>
                 </article>
             <% }) %>
