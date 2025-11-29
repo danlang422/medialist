@@ -35,9 +35,8 @@ async function searchGoogleBooks(title, author) {
     const publicationYear = publishedDate ? publishedDate.split('-')[0] : '';
 
     return {
-        isbn: data.items?.[0]?.volumeInfo?.industryIdentifiers?.[0]?.identifier,
-        coverUrl: coverUrl,
-        publicationYear: publicationYear
+        imageUrl: coverUrl,
+        year: publicationYear
     };
 }
 
@@ -57,157 +56,134 @@ async function searchTMDBMovie(title) {
     const releaseYear = releaseDate ? releaseDate.split('-')[0] : '';
 
     return {
-        title: data.results?.[0]?.title,
-        releaseYear: releaseYear,
-        posterUrl: posterUrl
+        imageUrl: posterUrl,
+        year: releaseYear
     };
 }
 
 app.get("/", async (req, res) => {
     try {
-        const books = await db.query("SELECT *, 'book' AS media_type FROM booklist ORDER BY created_at DESC");
-        const movies = await db.query("SELECT *, 'movie' AS media_type FROM movielist ORDER BY created_at DESC");
-        const tv = await db.query("SELECT *, 'tv' AS media_type FROM tvlist ORDER BY created_at DESC");
-
-        const normalizedBooks = books.rows.map(book => ({
-            id: book.id,
-            title: book.title,
-            creator: book.creator,
-            year: book.year,
-            image_url: book.image_url,
-            review: book.review, 
-            media_type: book.media_type,
-            created_at: book.created_at
-        }));
-
-        const normalizedMovies = movies.rows.map(movie => ({
-            id: movie.id,
-            title: movie.title,
-            creator: movie.creator,
-            year: movie.year,
-            image_url: movie.image_url,
-            review: movie.review,
-            media_type: movie.media_type,
-            created_at: movie.created_at
-        }));
-
-        const normalizedTV = tv.rows.map(show => ({
-            id: show.id,
-            title: show.title,
-            creator: show.creator,
-            year: show.year,
-            image_url: show.image_url,
-            review: show.review,
-            media_type: show.media_type,
-            created_at: show.created_at
-        }));
-
-        const allMedia = [...normalizedBooks, ...normalizedMovies, ...normalizedTV];
-        allMedia.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        res.render("index.ejs", { items: allMedia });
+        const result = await db.query("SELECT * FROM media ORDER BY created_at DESC");
+        res.render("index.ejs", { items: result.rows});
     } catch (error) {
-        console.error(error); 
-        res.render("index.ejs", { items: [] });
+        console.error(error);
+        res.render("index.ejs", {items: []});
     }
 });
 
-app.get("/books/new", (req, res) => { // new post page
+app.get("/media/new", (req, res) => {
     res.render("new-media.ejs");
 })
 
-app.post("/books", async (req, res) => { // post new media review
+app.post("/media", async (req, res) => {
     const title = req.body.title;
-    const author = req.body.author;
+    const creator = req.body.creator;
     const review = req.body.review;
-    // TODO: add review-exerpt parsing
-    try {
-        const { isbn, coverUrl, publicationYear } = await searchGoogleBooks(title, author); 
+    const mediaType = req.body.media_type;
 
-        if(!isbn) {
-            res.render("new-book.ejs", {error: "Book not found. Try different search terms."});
-            return;
+    try {
+        let imageUrl = '';
+        let year = '';
+
+        if (mediaType === 'book') {
+            const apiResult = await searchGoogleBooks(title, creator);
+            imageUrl = apiResult.imageUrl;
+            year = apiResult.year;
+
+            if (!imageUrl) {
+                res.render("new-media.ejs", {error: "Book not found. Try different search terms."});
+                return;
+            }
+        } else if (mediaType === 'movie') {
+            const apiResult = await searchTMDBMovie(title);
+            imageUrl = apiResult.imageUrl;
+            year = apiResult.year;
+
+            if (!imageUrl) {
+                res.render("new-media.ejs", {error: "Movie not found. Try different search terms."});
+                return;
+            }
         }
 
         const result = await db.query(
-            "INSERT INTO booklist (book_title, book_author, book_isbn, cover_url, review, publication_year) VALUES ($1, $2, $3, $4, $5 $6) RETURNING *",
-            [title, author, isbn, coverUrl, review, publicationYear]
+            "INSERT INTO media (title, creator, year, image_url, review, media_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [title, creator, year, imageUrl, review, mediaType]
         );
         res.redirect("/");
-        } catch (error) {
-            console.error("Error:", error);
-            res.render("new-book.ejs", { error: "Something went wrong. Please try again."});
-        }
+    } catch (error) {
+        console.error("Error:", error);
+        res.render("new-media.ejs", { error: "Something went wrong. Please try again."});
+    }
 });
 
-app.get("/books/:id", async (req, res) => { // view book review
+app.get("/media/:id", async (req, res) => {
     try {
-        const result = await db.query("SELECT * FROM booklist WHERE id = $1", [req.params.id]);
-        const book = result.rows[0];
+        const result = await db.query("SELECT * FROM media WHERE id = $1", [req.params.id]);
+        const item = result.rows[0];
 
-        if (!book) {
-            res.status(404).send("Book not found.");
+        if (!item) {
+            res.status(404).send("Media not found.");
             return;
         }
-        res.render("view-book.ejs", { book: book });
+        res.render("view-media.ejs", { item: item });
     } catch (error) {
         console.error(error);
         res.status(500).send("Server error");
     }
 });
 
-app.get("/books/edit/:id", async (req, res) => { // edit book review
+app.get("/media/edit/:id", async (req, res) => {
     try {
-        const result = await db.query("SELECT * FROM booklist WHERE id = $1", [req.params.id]);
-        const book = result.rows[0];
+        const result = await db.query("SELECT * FROM media WHERE id = $1", [req.params.id]);
+        const item = result.rows[0];
 
-        if (!book) {
-            res.status(404).send("Book not found");
+        if (!item) {
+            res.status(404).send("Media not found");
             return;
         }
 
-        res.render("edit-book.ejs", { book: book });
+        res.render("edit-media.ejs", { item: item });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Server error"); 
+        res.status(500).send("Server error");
     }
 });
 
-app.post("/books/edit/:id", async (req, res) => { // update book review
+app.post("/media/edit/:id", async (req, res) => {
     try {
-        const { title, author, review } = req.body;
-        const bookId = req.params.id; // id comes from URL not from body
+        const { title, creator, review } = req.body;
+        const itemId = req.params.id;
         const result = await db.query(
-            "UPDATE booklist SET book_title = $1, book_author = $2, review = $3 WHERE id = $4", 
-            [title, author, review, bookId]
+            "UPDATE media SET title = $1, creator = $2, review = $3 WHERE id = $4",
+            [title, creator, review, itemId]
         );
 
-        res.redirect(`/books/${bookId}`); // redirect back to the book's view page
+        res.redirect(`/media/${itemId}`);
     } catch (error) {
         console.error(error);
 
-        const book = {
+        const item = {
             id: req.params.id,
-            book_title: req.body.title,
-            book_author: req.body.author,
+            title: req.body.title,
+            creator: req.body.creator,
             review: req.body.review
         };
 
-        res.render("edit-book.ejs", {
-            book: book,
+        res.render("edit-media.ejs", {
+            item: item,
             error: "Error saving changes. Please try again."
         });
     }
 });
 
-app.post("/books/delete/:id", async (req, res) => {
+app.post("/media/delete/:id", async (req, res) => {
     try {
-        const bookId = req.params.id;
-        await db.query("DELETE FROM booklist WHERE id = $1", [bookId]); 
-        res.redirect("/"); 
+        const itemId = req.params.id;
+        await db.query("DELETE FROM media WHERE id = $1", [itemId]);
+        res.redirect("/");
     } catch (error) {
         console.error(error);
-        res.status(500).send("Error deleting book");
+        res.status(500).send("Error deleting media");
     }
 });
 
