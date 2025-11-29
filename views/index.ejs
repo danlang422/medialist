@@ -3,17 +3,27 @@
     <%- include('partials/header.ejs'); %>
 <body>
     <main>
-        <% if (books.length === 0) { %>
-            <p>No books yet! Add your first review.</p>
+        <% if (items.length === 0) { %>
+            <p>No media yet! Add your first review.</p>
         <% } else { %>
-            <% books.forEach(book => { %>
-                <article class ="media-card" onclick="window.location.href='/books/<%= book.id %>'">
-                    <img src="<%= book.cover_url %>" alt="<%= book.book_title %>" class="card-image">
+            <% items.forEach(item => { %>
+                <article class ="media-card" onclick="window.location.href='/media/<%= item.id %>'">
+                    <img src="<%= item.image_url %>" alt="<%= item.title %>" class="card-image">
 
                     <div class="card-content">
-                        <h2 class="card-title"><%= book.book_title %></h2>
-                        <p class = "card-excerpt"><%= book.review.slice(0, 150) %>...</p>
-                        <img src="/assets/book-icon-thick.svg" alt="Book" class="card-media-icon">
+                        <h2 class="card-title"><%= item.title %></h2>
+                        <p class = "card-excerpt"><%= item.review.slice(0, 150) %>...</p>
+                        <% if (item.media_type === 'book') { %>
+                            <img src="/assets/book-icon-thick.svg" alt="Book" class="card-media-icon">
+                        <% } else if (item.media_type === 'movie') { %>
+                            <img src="/assets/filmreel-icon-thick.svg" alt="Movie" class="card-media-icon">
+                        <% } else if (item.media_type === 'tv') { %>
+                            <img src="/assets/tv-icon-thick.svg" alt="TV Show" class="card-media-icon">
+                        <% } else if (item.media_type === 'game') { %>
+                            <img src="/assets/controller-icon-thick.svg" alt="Game" class="card-media-icon">
+                        <% } else if (item.media_type === 'music') { %>
+                            <img src="/assets/music-play-icon-thick.svg" alt="Music" class="card-media-icon">
+                        <% } %>
                     </div>
                 </article>
             <% }) %>
