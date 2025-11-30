@@ -9,12 +9,9 @@ const port = 3000;
 const pgPassword = process.env.DB_PASSWORD;
 
 const db = new pg.Client({
-  user: "postgres",
-  host: "localhost",
-  database: "medialist",
-  password: pgPassword,
-  port: 5432,
-});
+    connectionString: process.env.DATABASE_URL || `postgresql://postgres:${pgPassword}@localhost:5432/medialist`,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+  });
 
 db.connect();
 
