@@ -18,9 +18,6 @@
         </div>
         <div class="action-buttons">
             <a href="/media/edit/<%= item.id %>" class="btn-edit">Edit</a>
-            <form action="/media/delete/<%= item.id %>" method="POST" style="display: inline;">
-                <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this review?')">Delete</button>
-            </form>
         </div>
     </main>
 

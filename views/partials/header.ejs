@@ -13,34 +13,40 @@
 
         <nav>
             <ul class="media-filters">
-                <li><a href="/"><button class="filter-btn active">
+                <li><a href="/?filter=all"><button class="filter-btn <%= currentFilter === 'all' ? 'active' : '' %>">
                     All
                     <img src="/assets/infinity.svg" alt="infinity icon" class="btn-icon">
                 </button></a></li>
-                <li><button class="filter-btn">
+                
+                <li><a href="/?filter=book"><button class="filter-btn <%= currentFilter === 'book' ? 'active' : '' %>">
                     Books
                     <img src="/assets/book-icon-thick.svg" alt="book icon" class="btn-icon">
-                    </button></li>
-                <li><button class="filter-btn">
+                </button></a></li>
+                
+                <li><a href="/?filter=movie"><button class="filter-btn <%= currentFilter === 'movie' ? 'active' : '' %>">
                     Movies
                     <img src="/assets/filmreel-icon-thick.svg" alt="film reel icon" class="btn-icon">
-                    </button></li>
-                <li><button class="filter-btn">
+                </button></a></li>
+                
+                <li><a href="/?filter=tv"><button class="filter-btn <%= currentFilter === 'tv' ? 'active' : '' %>">
                     TV Shows
                     <img src="/assets/tv-icon-thick.svg" alt="tv icon" class="btn-icon">
-                    </button></li>
-                <li><button class="filter-btn">
+                </button></a></li>
+                
+                <li><a href="/?filter=game"><button class="filter-btn <%= currentFilter === 'game' ? 'active' : '' %>">
                     Games
                     <img src="/assets/controller-icon-thick.svg" alt="controller icon" class="btn-icon">
-                    </button></li>
-                <li><button class="filter-btn">
+                </button></a></li>
+                
+                <li><a href="/?filter=music"><button class="filter-btn <%= currentFilter === 'music' ? 'active' : '' %>">
                     Music
                     <img src="/assets/music-icon-thick.svg" alt="music icon" class="btn-icon">
-                    </button></li>
+                </button></a></li>
+                
                 <li><a href="/media/new"><button class="filter-btn new-entry-btn">
                     New
                     <img src="/assets/new.svg" alt="new icon" class="btn-icon">
                 </button></a></li>
             </ul>
         </nav>
-    </header>
+    </header> 

@@ -20,6 +20,10 @@ db.connect();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public")); 
+app.use((req, res, next) => {
+    res.locals.currentFilter = req.query.filter || 'all';
+    next();
+});
 
 async function searchGoogleBooks(title, author) {
     const searchQuery = `${title} ${author}`;
@@ -61,13 +65,112 @@ async function searchTMDBMovie(title) {
     };
 }
 
+async function searchTMDBTV(title) {
+    const searchQuery = `${title}`;
+    const encodedQuery = encodeURIComponent(searchQuery);
+    const tmdbApiKey = process.env.TMDB_API_KEY;
+    const tmdbApiUrl = `https://api.themoviedb.org/3/search/tv?api_key=${tmdbApiKey}&query=${encodedQuery}`;
+
+    const response = await fetch(tmdbApiUrl);
+    const data = await response.json();
+
+    const tmdbImageBase = 'https://image.tmdb.org/t/p/w500/';
+    const posterPath = data.results?.[0]?.poster_path;
+    const posterUrl = posterPath ? tmdbImageBase + posterPath : '';
+    const firstAirDate = data.results?.[0]?.first_air_date;
+    const releaseYear = firstAirDate ? firstAirDate.split('-')[0] : '';
+
+    return {
+        imageUrl: posterUrl,
+        year: releaseYear
+    };
+}
+
+async function searchRAWGGame(title) {
+    const encodedQuery = encodeURIComponent(title);
+    const rawgApiKey = process.env.RAWG_API_KEY;
+    const rawgApiUrl = `https://api.rawg.io/api/games?key=${rawgApiKey}&search=${encodedQuery}`;
+
+    const response = await fetch(rawgApiUrl);
+    const data = await response.json();
+
+    const game = data.results?.[0];
+    
+    if (!game) {
+        return { imageUrl: '', year: '' };
+    }
+
+    const imageUrl = game.background_image || ''; // High quality cover image
+    const releaseDate = game.released;
+    const year = releaseDate ? releaseDate.split('-')[0] : '';
+
+    return {
+        imageUrl: imageUrl,
+        year: year
+    };
+}
+
+async function searchLastFMMusic(title, artist) {
+    const encodedTitle = encodeURIComponent(title);
+    const encodedArtist = encodeURIComponent(artist);
+    const lastfmApiKey = process.env.LASTFM_API_KEY;
+    
+    // Search for the album
+    const searchUrl = `https://ws.audioscrobbler.com/2.0/?method=album.search&album=${encodedTitle}&api_key=${lastfmApiKey}&format=json`;
+    
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    
+    const album = data.results?.albummatches?.album?.[0];
+    
+    if (!album) {
+        return { imageUrl: '', year: '' };
+    }
+    
+    // Get the largest image available
+    const images = album.image;
+    const largeImage = images?.find(img => img.size === 'extralarge');
+    const imageUrl = largeImage?.['#text'] || '';
+    
+    // Last.fm doesn't always have release year in search results
+    // We'd need to make a second API call to get it, but let's start simple
+    const year = '';
+    
+    return {
+        imageUrl: imageUrl,
+        year: year
+    };
+}
+
 app.get("/", async (req, res) => {
     try {
-        const result = await db.query("SELECT * FROM media ORDER BY created_at DESC");
-        res.render("index.ejs", { items: result.rows});
+        const filter = req.query.filter; // Gets 'book', 'movie', 'all', or undefined
+
+        // Start building SQL query
+        let query = "SELECT * FROM media";
+        let params = [];
+
+        if (filter && filter !=='all') {
+            query += " WHERE media_type = $1";
+            params.push(filter);
+        }
+
+        // Always order by most recent
+        query += " ORDER BY created_at DESC";
+
+        // Execute query
+        const result = await db.query(query, params);
+
+        // Pass both items and the current filter to the template
+        res.render("index.ejs", {
+            items: result.rows,
+            currentFilter: filter || 'all' // default to 'all' if no filter
+        });
     } catch (error) {
-        console.error(error);
-        res.render("index.ejs", {items: []});
+        res.render("index.ejs", {
+            items: [],
+            currentFilter: 'all'
+        });
     }
 });
 
@@ -103,11 +206,38 @@ app.post("/media", async (req, res) => {
                 res.render("new-media.ejs", {error: "Movie not found. Try different search terms."});
                 return;
             }
+        } else if (mediaType === 'tv') {
+            const apiResult = await searchTMDBTV(title);
+            imageUrl = apiResult.imageUrl;
+            year = apiResult.year;
+        
+            if (!imageUrl) {
+                res.render("new-media.ejs", {error: "TV show not found. Try different search terms."});
+                return;
+            }
+        } else if (mediaType === 'game') {
+            const apiResult = await searchRAWGGame(title);
+            imageUrl = apiResult.imageUrl;
+            year = apiResult.year;
+        
+            if (!imageUrl) {
+                res.render("new-media.ejs", {error: "Game not found. Try different search terms."});
+                return;
+            }
+        } else if (mediaType === 'music') {
+            const apiResult = await searchLastFMMusic(title, creator);
+            imageUrl = apiResult.imageUrl;
+            year = apiResult.year;
+        
+            if (!imageUrl) {
+                res.render("new-media.ejs", {error: "Album not found. Try different search terms."});
+                return;
+            }
         }
 
         const result = await db.query(
             "INSERT INTO media (title, creator, year, image_url, review, media_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-            [title, creator, year, imageUrl, review, mediaType]
+            [title, creator, year || null, imageUrl, review, mediaType]
         );
         res.redirect("/");
     } catch (error) {

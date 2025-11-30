@@ -33,9 +33,13 @@
             <label for="review">Review:</label>
             <textarea id="review" name="review" rows="10" required></textarea>
         </div>
-        <button type="submit" class="btn-save">Save Media</button>
+        <div class="action-buttons">
+            <button type="submit" class="btn-save">Save Media</button>
+            <a href="/" class="btn-cancel">Cancel</a>    
+        </div>
+        
     </form>
 </main>
 
-<%- include ('partials/footer.ejs') %>
+<%- include ('partials/footer.ejs') %> 
 </html>
