@@ -10,7 +10,7 @@
 <body>
     <header>
         <h1>Media Journal</h1>
-
+    
         <nav>
             <ul class="media-filters">
                 <li><a href="/?filter=all"><button class="filter-btn <%= currentFilter === 'all' ? 'active' : '' %>">
@@ -48,5 +48,15 @@
                     <img src="/assets/new.svg" alt="new icon" class="btn-icon">
                 </button></a></li>
             </ul>
+            
+            <!-- Auth status section -->
+            <div class="auth-status">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <span>Logged in as <%= user.email %></span>
+                    <a href="/logout">Logout</a>
+                <% } else { %>
+                    <a href="/login">Login</a> | <a href="/register">Register</a>
+                <% } %>
+            </div>
         </nav>
-    </header> 
+    </header>

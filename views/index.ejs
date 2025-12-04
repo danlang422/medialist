@@ -14,17 +14,22 @@
                     <div class="card-content">
                         <h2 class="card-title"><%= item.title %></h2>
                         <p class = "card-excerpt"><%= item.review.slice(0, 150) %>...</p>
-                        <% if (item.media_type === 'book') { %>
-                            <img src="/assets/book-icon-thick.svg" alt="Book" class="card-media-icon">
-                        <% } else if (item.media_type === 'movie') { %>
-                            <img src="/assets/filmreel-icon-thick.svg" alt="Movie" class="card-media-icon">
-                        <% } else if (item.media_type === 'tv') { %>
-                            <img src="/assets/tv-icon-thick.svg" alt="TV Show" class="card-media-icon">
-                        <% } else if (item.media_type === 'game') { %>
-                            <img src="/assets/controller-icon-thick.svg" alt="Game" class="card-media-icon">
-                        <% } else if (item.media_type === 'music') { %>
-                            <img src="/assets/music-icon-thick.svg" alt="Music" class="card-media-icon">
-                        <% } %>
+                        <div class="card-footer">
+                            <% if (item.author_email) { %>
+                                <p class="card-author">Review by: <%= item.author_email %></p>
+                            <% } %>
+                            <% if (item.media_type === 'book') { %>
+                                <img src="/assets/book-icon-thick.svg" alt="Book" class="card-media-icon">
+                            <% } else if (item.media_type === 'movie') { %>
+                                <img src="/assets/filmreel-icon-thick.svg" alt="Movie" class="card-media-icon">
+                            <% } else if (item.media_type === 'tv') { %>
+                                <img src="/assets/tv-icon-thick.svg" alt="TV Show" class="card-media-icon">
+                            <% } else if (item.media_type === 'game') { %>
+                                <img src="/assets/controller-icon-thick.svg" alt="Game" class="card-media-icon">
+                            <% } else if (item.media_type === 'music') { %>
+                                <img src="/assets/music-icon-thick.svg" alt="Music" class="card-media-icon">
+                            <% } %>
+                        </div>
                     </div>
                 </article>
             <% }) %>

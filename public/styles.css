@@ -63,7 +63,7 @@ header {
 }
 
 h1 {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     font-size: 2.5rem;
 }
 
@@ -118,7 +118,18 @@ main {
 .card-media-icon {
     width: 24px;
     height: 24px;
-    align-self: flex-end;
+}
+
+.card-author {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);    
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-top: auto;
 }
 
@@ -196,14 +207,19 @@ textarea:focus {
 }
 
 .item-content h2 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
 }
 
-.review-date {
+.review-date, .review-author {
     color: var(--text-secondary);
     font-size: 0.9rem;
     font-style: italic;
+}
+
+.review-metadata {
     margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
 }
 
 .action-buttons {
@@ -243,4 +259,20 @@ textarea:focus {
 .btn-delete:hover,
 .btn-cancel:hover {
     background-color: #c0392b;
+}
+
+.auth-status {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ccc;
+    font-size: 0.9rem;
+}
+
+.auth-status a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.auth-status a:hover {
+    text-decoration: underline;
 }

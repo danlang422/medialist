@@ -12,13 +12,23 @@
                 <% if (item.year) { %>
                     <p class="media-year">Year: <%= item.year %></p>
                 <% } %>
-                <p class="review-date">Reviewed on <%= new Date(item.created_at).toLocaleDateString() %></p>
+                <div class="review-metadata">
+                    <p class="review-date">Reviewed on <%= new Date(item.created_at).toLocaleDateString() %></p>
+                <% if (item.author_email) { %>
+                    <p class="review-author">Review by: <%= item.author_email %></p>
+                <% } %>
+                </div>
                 <p><%= item.review %></p>
             </div>
         </div>
-        <div class="action-buttons">
-            <a href="/media/edit/<%= item.id %>" class="btn-edit">Edit</a>
-        </div>
+
+        <%# Only show edit button if user is logged in AND owns this entry %>
+        <% if (typeof user !== 'undefined' && item.user_id === user.id) { %>
+            <div class="action-buttons">
+                <a href="/media/edit/<%= item.id %>" class="btn-edit">Edit</a>
+            </div>
+        <% } %>
+
     </main>
 
     <%- include('partials/footer.ejs'); %>
