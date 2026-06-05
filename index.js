@@ -58,7 +58,8 @@ app.use((req, res, next) => {
 async function searchGoogleBooks(title, author) {
     const searchQuery = `${title} ${author}`;
     const encodedQuery = encodeURIComponent(searchQuery);
-    const googleApiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}`;
+    const googleApiKey = process.env.GOOGLE_BOOKS_API_KEY;
+    const googleApiURL = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&key=${googleApiKey}`;
 
     const response = await fetch(googleApiURL);
     const data = await response.json();
