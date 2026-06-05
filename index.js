@@ -252,16 +252,6 @@ app.get("/logout", (req, res) => {
     });
 });
 
-// Add this RIGHT AFTER your logout route (just for testing)
-app.get("/debug", (req, res) => {
-    res.send(`
-        <h1>Debug Info</h1>
-        <p>Is Authenticated: ${req.isAuthenticated()}</p>
-        <p>User: ${JSON.stringify(req.user)}</p>
-        <p>Session: ${JSON.stringify(req.session)}</p>
-    `);
-});
-
 app.get("/", async (req, res) => {
     try {
         const filter = req.query.filter; 
