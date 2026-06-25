@@ -14,12 +14,14 @@ const port = 3000;
 
 const pgPassword = process.env.DB_PASSWORD;
 
-const db = new pg.Client({
+const db = new pg.Pool({
     connectionString: process.env.DATABASE_URL || `postgresql://postgres:${pgPassword}@localhost:5432/medialist`,
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
   });
 
-db.connect();
+db.on('error', (err) => {
+    console.error('Unexpected database pool error:', err);
+});
 
 // Session store setup
 const pgSession = connectPg(session);
